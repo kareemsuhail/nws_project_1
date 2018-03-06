@@ -1,7 +1,7 @@
 from threading import Thread
 import json
 class ClientThread(Thread):
-    def __init__(self, ip, port,conn,connected_users,threads):
+    def __init__(self, ip, port,conn,connected_users,threads,groups):
         Thread.__init__(self)
         self.ip = ip
         self.port = port
@@ -10,6 +10,7 @@ class ClientThread(Thread):
         self.response = {}
         self.responseBytes = b''
         self.server_threads = threads
+        self.groups = groups
         print("[+] new client has connected " + ip + ":" + str(port))
 
     def run(self):
@@ -51,6 +52,19 @@ class ClientThread(Thread):
                 self.prepare_msg("sorry {} is already taken".format(username),'server','info','failed',username)
                 print(self.responseBytes)
                 self.conn.send(self.responseBytes)
+        elif command.startswith("**create_group"):
+            group = command[len('**create_group'):].strip()
+            if group not in self.groups:
+                print("{} group has been created".format(group))
+                self.groups[group] = [self.server_threads[self.connected_users[data_dictionary['username']]]]
+                self.prepare_msg("group {} has been created".format(group), 'server', 'info', 'success', group)
+                self.conn.send(self.responseBytes)
+            else:
+                self.prepare_msg("sorry group {} is already exists".format(group), 'server', 'info', 'failed', group)
+                self.conn.send(self.responseBytes)
+        else:
+            print("unknown command received")
+
 
 
     def prepare_msg(self,msg,username,type,status,data):

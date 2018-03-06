@@ -11,6 +11,7 @@ class Server:
         self.server.bind((self.TCP_IP, self.TCP_PORT))
         self.threads = {}
         self.connected_users = {}
+        self.groups = {}
     def  start(self):
         connected_users = self.connected_users
         print("server started")
@@ -18,7 +19,7 @@ class Server:
             self.server.listen(4)
             (conn, (ip, port)) = self.server.accept()
             print(conn,ip,port)
-            newthread = ClientThread(ip, port,conn=conn,connected_users=connected_users,threads=self.threads)
+            newthread = ClientThread(ip, port,conn=conn,connected_users=connected_users,threads=self.threads,groups=self.groups)
             newthread.start()
             self.threads[str(ip)+":"+str(port)] = newthread
             print(self.threads)
