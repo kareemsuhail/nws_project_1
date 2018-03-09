@@ -18,13 +18,9 @@ class Server:
         while True:
             self.server.listen(4)
             (conn, (ip, port)) = self.server.accept()
-            print(conn,ip,port)
             newthread = ClientThread(ip, port,conn=conn,connected_users=connected_users,threads=self.threads,groups=self.groups)
             newthread.start()
             self.threads[str(ip)+":"+str(port)] = newthread
-            print(self.threads)
-
-
         for t in threads:
             t.join()
 if __name__ == '__main__':

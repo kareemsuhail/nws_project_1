@@ -33,9 +33,9 @@ class Room:
 
         while(True):
             key = self.inputWindow.getch()
-            if(key != 10 and key!=27):
+            if key != 10 and key!=27:
                 self.msg = self.msg + chr(key)
-            elif(key ==10):
+            elif key ==10:
                 if(self.msg.startswith('**')):
                     execute_command(self)
                     self.clear_input(display_msg=False)
@@ -43,8 +43,14 @@ class Room:
                     self.client.info['type'] = 'msg'
                     self.client.send(self.msg)
                     self.clear_input()
-            elif(key ==27):
+            elif key == 0x08:
+                self.msg = self.msg[:len(msg)-2]
+                self.inputWindow.clear()
+                self.inputWindow.move(1, 1)
+                self.inputWindow.addstr(msg)
+            elif key ==27 :
                 try:
+                    self.client.client.close()
                     self.receive_data_thread._stop()
                 except:
                     pass

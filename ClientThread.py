@@ -28,12 +28,18 @@ class ClientThread(Thread):
                                  data_dictionary['username'])
                 self.conn.send(self.responseBytes)
                 continue
-            if data_dictionary['msgTo'] != 'unknown':
+            if data_dictionary['msgTo'] != 'unknown' and data_dictionary['rec'] == 'person':
                 msg = bytes(json.dumps(data_dictionary),'utf-8')
-                print(self.server_threads)
+
 
                 self.server_threads[self.connected_users[data_dictionary['msgTo']]
                 ].conn.send(msg)
+            elif data_dictionary['msgTo'] != 'unknown' and data_dictionary['rec'] == 'group':
+                msg = bytes(json.dumps(data_dictionary), 'utf-8')
+                for clientThread in self.groups[data_dictionary['msgTo']]:
+                    if clientThread != self:
+                        clientThread.conn.send(msg)
+
             else:
                 self.prepare_msg("sorry you have to specify msg receiver", 'server', 'info', 'failed', data_dictionary['username'])
                 self.conn.send(self.responseBytes)
@@ -50,20 +56,31 @@ class ClientThread(Thread):
                 self.conn.send(self.responseBytes)
             else:
                 self.prepare_msg("sorry {} is already taken".format(username),'server','info','failed',username)
-                print(self.responseBytes)
+
                 self.conn.send(self.responseBytes)
         elif command.startswith("**create_group"):
             group = command[len('**create_group'):].strip()
             if group not in self.groups:
                 print("{} group has been created".format(group))
-                self.groups[group] = [self.server_threads[self.connected_users[data_dictionary['username']]]]
+                self.groups[group] = []
                 self.prepare_msg("group {} has been created".format(group), 'server', 'info', 'success', group)
                 self.conn.send(self.responseBytes)
             else:
                 self.prepare_msg("sorry group {} is already exists".format(group), 'server', 'info', 'failed', group)
                 self.conn.send(self.responseBytes)
+        elif command.startswith("**connect_to_group"):
+            group = command[len('**connect_to_group'):].strip()
+            if group in self.groups:
+                print("{} has connected to group {}".format(data_dictionary['username'],group))
+                self.groups[group].append(self.server_threads[self.connected_users[data_dictionary['username']]])
+                self.prepare_msg("you are now connected to group {}".format(group), 'server', 'info', 'success', group)
+                self.conn.send(self.responseBytes)
+            else:
+                self.prepare_msg("sorry group {} is not exists".format(group), 'server', 'info', 'failed', group)
+                self.conn.send(self.responseBytes)
         else:
-            print("unknown command received")
+            self.prepare_msg("sorry this is unknown command", 'server', 'info', 'failed', ' ')
+            self.conn.send(self.responseBytes)
 
 
 

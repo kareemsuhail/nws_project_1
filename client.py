@@ -11,7 +11,7 @@ class Client:
         self.info['port'] = port
         self.info['ip'] = socket.gethostbyname(socket.gethostname())
         self.info['s_ip'] = socket.gethostbyname(socket.gethostname())
-
+        self.info['rec'] = 'person'
         self.info['username'] = sys.argv[0] if len(sys.argv) > 1 else "unknown"
         self.info['msgTo'] = sys.argv[1] if len(sys.argv) > 2 else "unknown"
         self.info['msg'] = 'no msg provided'

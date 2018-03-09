@@ -1,13 +1,19 @@
 def execute_command(room):
     if room.msg.startswith('**set_username'):
-        username = room.msg[len('**set_username'):].strip()
         room.client.info['type'] = 'command'
         room.client.send(room.msg)
     if room.msg.startswith('**connect_with'):
+        room.client.info['rec'] = 'person'
         msgTo = room.msg[len('**connect_with'):].strip()
         room.client.info['msgTo'] = msgTo
     if room.msg.startswith('**create_group'):
         room.client.info['type'] = 'command'
+        room.client.send(room.msg)
+    if room.msg.startswith("**connect_to_group"):
+        group = room.msg[len("**connect_to_group"):].strip()
+        room.client.info['msgTo'] = group
+        room.client.info['type'] = 'command'
+        room.client.info['rec'] = 'group'
         room.client.send(room.msg)
 
 
