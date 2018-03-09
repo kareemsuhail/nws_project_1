@@ -6,6 +6,7 @@ def execute_command(room):
         room.client.info['rec'] = 'person'
         msgTo = room.msg[len('**connect_with'):].strip()
         room.client.info['msgTo'] = msgTo
+        room.display_info("you are now connected to {}".format(msgTo))
     if room.msg.startswith('**create_group'):
         room.client.info['type'] = 'command'
         room.client.send(room.msg)

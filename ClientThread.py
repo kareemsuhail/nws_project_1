@@ -1,4 +1,5 @@
 from threading import Thread
+from textblob import TextBlob
 import json
 class ClientThread(Thread):
     def __init__(self, ip, port,conn,connected_users,threads,groups):
@@ -29,13 +30,18 @@ class ClientThread(Thread):
                 self.conn.send(self.responseBytes)
                 continue
             if data_dictionary['msgTo'] != 'unknown' and data_dictionary['rec'] == 'person':
-                msg = bytes(json.dumps(data_dictionary),'utf-8')
 
-
+                temp = TextBlob((data_dictionary['msg']))
+                if temp.sentiment.polarity != 0 :
+                    print("{} is {}".format(data_dictionary['username'],"happy" if temp.sentiment.polarity > 0 else "sad"))
+                temp = temp.correct()
+                data_dictionary['msg'] = temp.string
+                msg = bytes(json.dumps(data_dictionary), 'utf-8')
                 self.server_threads[self.connected_users[data_dictionary['msgTo']]
                 ].conn.send(msg)
             elif data_dictionary['msgTo'] != 'unknown' and data_dictionary['rec'] == 'group':
                 msg = bytes(json.dumps(data_dictionary), 'utf-8')
+                data_dictionary['msg'] = TextBlob(data_dictionary['msg']).correct().string
                 for clientThread in self.groups[data_dictionary['msgTo']]:
                     if clientThread != self:
                         clientThread.conn.send(msg)
@@ -52,7 +58,6 @@ class ClientThread(Thread):
                 user_data = str(data_dictionary['s_ip']+":"+str(self.port))
                 self.connected_users[username] = user_data
                 self.prepare_msg("**set_username",'server','command','success',username)
-                print(self.responseBytes)
                 self.conn.send(self.responseBytes)
             else:
                 self.prepare_msg("sorry {} is already taken".format(username),'server','info','failed',username)
